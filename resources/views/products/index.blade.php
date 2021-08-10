@@ -33,23 +33,18 @@
         </tr>
 	    @foreach ($products as $product)
 	    <tr>
-	        <td>{{ ++$i }}</td>
+	        <td>{{ $loop->iteration }}</td>
 	        <td>{{ $product->name }}</td>
 	        <td>{{ $product->detail }}</td>
 	        <td>
-                <form action="{{ route('products.destroy',$product->id) }}" method="POST">
                     <a class="btn btn-info" href="{{ route('products.show',$product->id) }}">Show</a>
                     @can('product-edit')
                     <a class="btn btn-primary" href="{{ route('products.edit',$product->id) }}">Edit</a>
                     @endcan
-
-
-                    @csrf
-                    @method('DELETE')
                     @can('product-delete')
-                    <button type="submit" class="btn btn-danger">Delete</button>
+                    <button class="btn btn-danger" onclick="deleteItem(this)" data-id="{{ $product->id }}">Delete</button>
                     @endcan
-                </form>
+               
 	        </td>
 	    </tr>
 	    @endforeach
@@ -59,4 +54,68 @@
     {!! $products->links() !!}
 
 </div>
+<script type="application/javascript">
+
+        function deleteItem(e){
+
+            let id = e.getAttribute('data-id');
+            console.log(id)
+
+            const swalWithBootstrapButtons = Swal.mixin({
+                customClass: {
+                    confirmButton: 'btn btn-success',
+                    cancelButton: 'btn btn-danger'
+                },
+                buttonsStyling: true
+            });
+
+            swalWithBootstrapButtons.fire({
+                title: 'هل تريد الاستمرار؟?',
+                text: "لن تتمكن من التراجع عن هذا!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'نعم ، احذفها!',
+                cancelButtonText:  'لا ، إلغاء!',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.value) {
+                    if (result.isConfirmed){
+
+                        $.ajax({
+                            type:'POST',
+                            url:"product/"+id,
+                            data:{
+                                "_token": "{{ csrf_token() }}",
+                                "_method": 'DELETE',
+                            },
+                            success:function(data) {
+                                if (data.success){
+                                    swalWithBootstrapButtons.fire(
+                                        'تم الحذف!',
+                                        'تم حذف ملفك.',
+                                        "success"
+                                    );
+                                    $("#"+id+"").remove(); // you can add name div to remove
+                                    location.reload();
+                                }
+                            }
+                           
+                        });
+
+                    }
+
+                } else if (
+                    result.dismiss === Swal.DismissReason.cancel
+                ) {
+                    swalWithBootstrapButtons.fire(
+                        'ألغيت',
+                        'ملفك التخيلي آمن:)',
+                        'error'
+                    );
+                }
+            });
+
+        }
+
+    </script>
 @endsection

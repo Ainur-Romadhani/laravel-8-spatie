@@ -40,17 +40,82 @@
                 <a class="btn btn-primary" href="{{ route('roles.edit',$role->id) }}">Edit</a>
             @endcan
             @can('role-delete')
-                <form action="{{route('roles.destroy',$role->id)}}" method="post" class="d-inline">
+                <!-- <form action="{{route('roles.destroy',$role->id)}}" method="post" class="d-inline">
                     @method('delete')
                     @csrf
                     <button type="submit" class="btn btn-danger">
                         Delete
                     </button>
-                </form>
+                </form> -->
+                <button class="btn btn-danger" onclick="deleteItem(this)" data-id="{{ $role->id }}">Delete</button>
             @endcan
         </td>
     </tr>
     @endforeach
 </table>
 </div>
+<script type="application/javascript">
+
+        function deleteItem(e){
+
+            let id = e.getAttribute('data-id');
+            console.log(id)
+
+            const swalWithBootstrapButtons = Swal.mixin({
+                customClass: {
+                    confirmButton: 'btn btn-success',
+                    cancelButton: 'btn btn-danger'
+                },
+                buttonsStyling: true
+            });
+
+            swalWithBootstrapButtons.fire({
+                title: 'هل تريد الاستمرار؟?',
+                text: "لن تتمكن من التراجع عن هذا!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'نعم ، احذفها!',
+                cancelButtonText:  'لا ، إلغاء!',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.value) {
+                    if (result.isConfirmed){
+
+                        $.ajax({
+                            type:'POST',
+                            url:"roles/"+id,
+                            data:{
+                                "_token": "{{ csrf_token() }}",
+                                "_method": 'DELETE',
+                            },
+                            success:function(data) {
+                                if (data.success){
+                                    swalWithBootstrapButtons.fire(
+                                        'Deleted!',
+                                        'Your file has been deleted.',
+                                        "success"
+                                    );
+                                    $("#"+id+"").remove(); // you can add name div to remove
+                                }
+                            }
+                           
+                        });
+                        location.reload();
+
+                    }
+
+                } else if (
+                    result.dismiss === Swal.DismissReason.cancel
+                ) {
+                    swalWithBootstrapButtons.fire(
+                        'ألغيت',
+                        'ملفك التخيلي آمن:)',
+                        'error'
+                    );
+                }
+            });
+
+        }
+
+    </script>
 @endsection

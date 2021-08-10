@@ -43,17 +43,81 @@
     <td>
        <a class="btn btn-info" href="{{ route('users.show',$user->id) }}">Show</a>
        <a class="btn btn-primary" href="{{ route('users.edit',$user->id) }}">Edit</a>
-       <form action="{{route('users.destroy',$user->id)}}" method="post" class="d-inline">
+       <!-- <form action="{{route('users.destroy',$user->id)}}" method="post" class="d-inline">
             @method('delete')
             @csrf
             <button type="submit" class="btn btn-danger">
                 Delete
             </button>
-        </form>
+        </form> -->
+        <button class="btn btn-danger" onclick="deleteItem(this)" data-id="{{ $user->id }}">Delete</button>
     </td>
   </tr>
  @endforeach
 </table>
 </div>
+<script type="application/javascript">
 
+        function deleteItem(e){
+
+            let id = e.getAttribute('data-id');
+            console.log(id)
+
+            const swalWithBootstrapButtons = Swal.mixin({
+                customClass: {
+                    confirmButton: 'btn btn-success',
+                    cancelButton: 'btn btn-danger'
+                },
+                buttonsStyling: true
+            });
+
+            swalWithBootstrapButtons.fire({
+                title: 'هل تريد الاستمرار؟?',
+                text: "لن تتمكن من التراجع عن هذا!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'نعم ، احذفها!',
+                cancelButtonText:  'لا ، إلغاء!',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.value) {
+                    if (result.isConfirmed){
+
+                        $.ajax({
+                            type:'POST',
+                            url:"users/"+id,
+                            data:{
+                                "_token": "{{ csrf_token() }}",
+                                "_method": 'DELETE',
+                            },
+                            success:function(data) {
+                                if (data.success){
+                                    swalWithBootstrapButtons.fire(
+                                        'تم الحذف!',
+                                        'تم حذف ملفك.',
+                                        "success"
+                                    );
+                                    $("#"+id+"").remove(); // you can add name div to remove
+                                    location.reload();
+                                }
+                            }
+                           
+                        });
+
+                    }
+
+                } else if (
+                    result.dismiss === Swal.DismissReason.cancel
+                ) {
+                    swalWithBootstrapButtons.fire(
+                        'ألغيت',
+                        'ملفك التخيلي آمن:)',
+                        'error'
+                    );
+                }
+            });
+
+        }
+
+    </script>
 @endsection
