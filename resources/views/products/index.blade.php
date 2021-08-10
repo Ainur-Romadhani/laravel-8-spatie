@@ -83,7 +83,7 @@
 
                         $.ajax({
                             type:'POST',
-                            url:"product/"+id,
+                            url:"products/"+id,
                             data:{
                                 "_token": "{{ csrf_token() }}",
                                 "_method": 'DELETE',
@@ -94,9 +94,11 @@
                                         'تم الحذف!',
                                         'تم حذف ملفك.',
                                         "success"
-                                    );
+                                    ).then((result) => {
+                                        location.reload();
+                                    })
                                     $("#"+id+"").remove(); // you can add name div to remove
-                                    location.reload();
+                                    
                                 }
                             }
                            

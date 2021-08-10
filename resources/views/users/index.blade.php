@@ -96,9 +96,10 @@
                                         'تم الحذف!',
                                         'تم حذف ملفك.',
                                         "success"
-                                    );
+                                    ).then((result) => {
+                                        location.reload();
+                                    })
                                     $("#"+id+"").remove(); // you can add name div to remove
-                                    location.reload();
                                 }
                             }
                            
